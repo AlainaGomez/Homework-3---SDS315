@@ -1,0 +1,94 @@
+---
+title: "Homework 3 - SDS315"
+author: "Alaina Gomez (agg3395)"
+date: "2024-02-01"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: yes
+    toc_float: yes
+    theme: cerulean
+---
+
+
+[Link to GitHub](https://github.com/AlainaGomez/Homework-3---SDS315)
+
+```{r setup, include = FALSE, echo = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(tidyverse)
+library(readxl)
+library(knitr)
+creatinine <- read_csv("creatinine.csv")
+milk <- read_csv("milk.csv")
+covid <- read_csv("covid.csv")
+marketmodel <- read_csv("marketmodel.csv")
+
+# Importing in the Google Sheets I made form the data
+filepath <- "/Users/alainagomez/Desktop/Homework3-SDS315.xlsx"
+tabletibble <- readxl::read_excel(filepath) %>%
+  as_tibble()
+```
+
+# Problem 1
+
+```{r, include = FALSE, echo = FALSE}
+model_creatinine = lm(creatclear ~ age, data=creatinine)
+coef(model_creatinine)
+```
+
+A)  The creatinine clearance rate we should expect for a 55-year-old is around `r round(147.813-0.619*55, digits = 3)` mL/M. We can create a linear regression model that gives you a y-intercept and and the slope based on the creatinine data that is able to accurately predict the average clearance rate for a 55-year-old. The y-intercept of the model is 147.813 and the slope is -0.619.
+
+B)  Creatinine clearance rate decreases at around 0.619 mL/min per year in age. I determined this as the "slope" that came from the linear regression model of the data.
+
+C)  In comparing a 40-year-old with a rate of 135 mL/min or a 60-year-old with a rate of 112 mL/min, we would have to compare whether or not these rates are below or above the predicted rates for their age. An average 40-year-old will have a creatinine rate of `r round(147.813-0.619*40, digits = 2)` (147.813 - 0.619 * 40).  An average 60-year-old will have a creatinine rate of `r round(147.813-0.619*60, digits = 2)` (147.813 - 0.619 * 60). Therefore, the 40-year-old is 12 mL/min above age average while the 60-year-old is only 2 mL/min above age average. Indicating that the 40-year-old is healthier.
+
+# Problem 2
+
+A) The "beta" of a stock is essentially a systematically associated market risk for a said stock. Beta is calculated based on gathered data on a company, overall market return value, and marked variance. Similarly, beta is calculated officially by dividing the covariance of the stock and market returns by the variance of the market returns. Beta can also be represented as the slope of the regression line when plotting the stock's returns against the market returns (like Apple, Google, Merck, Johnson and Johnson, Wal-Mart, and Target). Beta greater than 1 suggests more danger than the overall market with either great return or horrible return. Beta less than 1 suggests less danger than the overall market and therefore has less noticeable return/danger. A negative beta represents an inverse relationship with the overall market.
+
+B)
+
+```{r, echo = FALSE}
+# importing and selecting only certain columns and rows of the table I made
+reg_stocks <- tabletibble %>%
+  select("Ticker", "Slope", "Intercept", "R-Squared") %>%
+  head(6)
+# fancy table
+kable(reg_stocks, format = "markdown")
+```
+
+Ticker indicates the 6 individual stocks taken data on in comparison to the S&P 500 stock index. Intercept and slope are calculated according to the company stock betas. R-squared is the proportion of variance in the individual stock's return that is explained by the variation in the S&P 500 return. Higher R-squared values suggest a better fit of the regression model to the data.
+
+C) The stock that has the highest systematic risk is Google because it has the highest R-squared value, indicating that a significant portion of the stock's variability can be attributed to movements in the market. The stock that has the lowest systematic risk is Target due to having the lowest R-squared value and for opposite reasons than that of Google.
+
+# Problem 3
+
+```{r, echo = FALSE, include = FALSE}
+spain <- filter(covid, country == "Spain")
+italy <- filter(covid, country == "Italy")
+lm_italy = lm(log(deaths) ~ days_since_first_death, data = italy)
+coef(lm_italy)
+lm_spain = lm(log(deaths) ~ days_since_first_death, data = spain)
+coef(lm_spain)
+```
+
+1. The estimated growth rate for Italy is 18.321%. The estimated doubling time for Italy is `r round((70/18.3218), digits = 0)` days since first death.
+
+2. The estimated growth rate for Spain is 27.624%. The estimated doubling time for Spain is `r round((70/27.62447), digits = 0)` days since first death.
+
+3. Line graph reporting the daily deaths over time in each country:
+
+```{r, echo = FALSE}
+ggplot(covid, aes(x = days_since_first_death, y = deaths, color = country)) + geom_line() + labs(x = "Days since First Death", y = "Deaths", color = "Country", title = "Daily Deaths over Time (Italy vs. Spain)")
+```
+
+# Problem 4
+
+```{r, echo = FALSE, include = FALSE}
+lm_milk = lm(log(sales) ~ log(price), data = milk)
+coef(lm_milk)
+```
+
+The estimated elasticity of demand for milk is `r round(1.618578, digits = 3)` (absolute value). The elasticity is larger than 1, therefore, the demand of milk is elastic and the demand of milk decreases with higher prices. By taking the natural log of the price in comparison to the natural log of sales, the value of elasticity of demand for milk results in -1.618. When milk prices change by 1%, the demand of milk decreases by 1.618%.
